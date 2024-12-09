@@ -116,7 +116,6 @@ def displayDigit(digit, position, servos):
     for i in range(old_pos,new_pos + increment, increment):
         servos[position].angle = i
         print(i,"", end='')
-        #servos[position].angle = None  
         time.sleep(0.02)  
 
     # Release servo

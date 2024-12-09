@@ -151,8 +151,6 @@ if __name__ == "__main__":
                 for i in range(3):
                     displayDigit(j, i, servos)
                     print(j,"at position",i)
-                    displayDigit(0, 3, servos)
-                    print("0 at position 3")
             print("loop")
                  
     # Sync the board clock via ntp and record current time

@@ -10,18 +10,18 @@ from adafruit_motor import servo
 
 # Settings
 MILITARY_TIME = False
-RESYNC_HOURS = 4
+RESYNC_HOURS = 24
 TZ_OFFSET = -4
 DEBUG = False
 
-# PWM Outputs from board to servos
-PIN_LIST = [board.IO4, board.IO3, board.IO1, board.IO0]
-
-# Servo settings.
+# Servo settings
 MIN_PULSE = 500
 MAX_PULSE = 2500
 FREQUENCY = 50
 DUTY_CYCLE = 2**15
+
+# PWM Outputs from board to servos
+PIN_LIST = [board.IO0, board.IO1, board.IO3, board.IO4]
 
 # Create stop points
 STOPS_LIST = [
@@ -31,6 +31,7 @@ STOPS_LIST = [
     [166, 150, 135, 112, 94, 77, 59, 42, 24, 7]
 ]
 
+# List to store last known position of servo
 LAST_POSITION = [
     STOPS_LIST[0][0],
     STOPS_LIST[1][0],
@@ -70,15 +71,15 @@ def getServoList():
     for pin in PIN_LIST:
         servo_list.append(
             servo.Servo(
-            pwmio.PWMOut(
-                pin,
-                duty_cycle=DUTY_CYCLE,
-                frequency=FREQUENCY
-            ),
-            min_pulse = MIN_PULSE,
-            max_pulse = MAX_PULSE
+                pwmio.PWMOut(
+                    pin,
+                    duty_cycle=DUTY_CYCLE,
+                    frequency=FREQUENCY
+                ),
+                min_pulse = MIN_PULSE,
+                max_pulse = MAX_PULSE
+            )
         )
-    )
     return(servo_list)
 
 # return a 4 digit number with the current time (eg: 11:42am -> 1142)
@@ -116,6 +117,7 @@ def displayDigit(digit, position, servos):
     for i in range(old_pos,new_pos + increment, increment):
         servos[position].angle = i
         print(i,"", end='')
+        #servos[position].angle = None  
         time.sleep(0.02)  
 
     # Release servo
@@ -131,8 +133,8 @@ def displayDigit(digit, position, servos):
 def displayTime(t, servos):
     for i in range(4):
         digit = getDigit(t, i)
-        print("Displaying digit", digit, "at position ", 3-i)
-        displayDigit(digit, 3-i, servos)
+        print("Displaying digit", digit, "at position ", i)
+        displayDigit(digit, i, servos)
     
     print("Done update")
     return
@@ -147,7 +149,7 @@ if __name__ == "__main__":
     if DEBUG:
         while True:
             for j in range(10):
-                for i in range(3):
+                for i in range(4):
                     displayDigit(j, i, servos)
                     print(j,"at position",i)
             print("loop")
@@ -174,11 +176,12 @@ if __name__ == "__main__":
         # Check if the time has changed
         if(last_time != new_time):
             # Time has changed, update the clock
-            print("Updating time to: ", new_time) 
+            print("Updating time to:", new_time) 
             displayTime(new_time, servos)
             # New time now becomes old time
             last_time = new_time
 
+        # Pause before continuing loop
         time.sleep(1)
 
 
